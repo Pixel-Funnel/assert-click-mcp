@@ -1,0 +1,45 @@
+{
+  "name": "@assert-click/mcp",
+  "version": "1.0.0",
+  "description": "Run AI-powered E2E tests from plain Markdown. Generate scenarios, execute Playwright tests, and inspect results — all from your AI coding agent.",
+  "type": "module",
+  "bin": {
+    "assert-mcp": "dist/index.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup src/index.ts --format esm --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "tsup": "^8.0.1",
+    "typescript": "^5.5.4"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/assert-click/mcp.git"
+  },
+  "keywords": [
+    "mcp",
+    "assert",
+    "playwright",
+    "e2e",
+    "testing",
+    "ai"
+  ]
+}
