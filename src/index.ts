@@ -12,6 +12,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 
 import { AssertClient, structuredError } from "./client.js";
+import { resolveMcpConfig } from "./config.js";
 import {
   TOOL_DEFINITIONS,
   handleAssertList,
@@ -24,16 +25,30 @@ import {
 // Bootstrap
 // ---------------------------------------------------------------------------
 
-const apiKey = process.env.ASSERT_API_KEY;
+let runtimeConfig;
+try {
+  runtimeConfig = resolveMcpConfig({
+    cwd: process.cwd(),
+    env: process.env,
+    defaultBaseUrl: "https://api.assert.click",
+  });
+} catch (err) {
+  const message = err instanceof Error ? err.message : String(err);
+  process.stderr.write(`[assert-mcp] ERROR: ${message}\n`);
+  process.exit(1);
+}
+
+const apiKey = runtimeConfig.apiKey;
 if (!apiKey) {
   process.stderr.write(
-    "[assert-mcp] ERROR: ASSERT_API_KEY environment variable is not set.\n"
+    "[assert-mcp] ERROR: Assert API key is not set. Configure ASSERT_API_KEY, projectApiKeyEnv, or projectApiKey in assert.config.json.\n"
   );
   process.exit(1);
 }
 
-const baseUrl = process.env.ASSERT_HOST_URL ?? "https://api.assert.click";
-const client = new AssertClient(apiKey, baseUrl);
+const client = new AssertClient(apiKey, runtimeConfig.baseUrl, {
+  defaultProjectId: runtimeConfig.projectId,
+});
 
 // ---------------------------------------------------------------------------
 // Server

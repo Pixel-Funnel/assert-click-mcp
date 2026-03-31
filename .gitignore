@@ -9,6 +9,7 @@ dist/
 .env.*
 *.env
 .npmrc
+assert.config.local.json
 
 # Logs
 *.log

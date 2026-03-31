@@ -71,7 +71,7 @@ function validateBaseUrl(url: string): void {
   try {
     parsed = new URL(url);
   } catch {
-    throw new AssertApiError("INVALID_CONFIG", "ASSERT_BASE_URL is not a valid URL.", 0);
+    throw new AssertApiError("INVALID_CONFIG", "Configured Assert API URL is not a valid URL.", 0);
   }
   const isHttps = parsed.protocol === "https:";
   const isLocalhost =
@@ -80,7 +80,7 @@ function validateBaseUrl(url: string): void {
   if (!isHttps && !isLocalhost) {
     throw new AssertApiError(
       "INVALID_CONFIG",
-      "ASSERT_BASE_URL must use https:// (or http://localhost for local development).",
+      "Configured Assert API URL must use https:// (or http://localhost for local development).",
       0
     );
   }
@@ -89,11 +89,13 @@ function validateBaseUrl(url: string): void {
 export class AssertClient {
   private baseUrl: string;
   private apiKey: string;
+  private defaultProjectId: string | null;
 
-  constructor(apiKey: string, baseUrl = DEFAULT_BASE_URL) {
+  constructor(apiKey: string, baseUrl = DEFAULT_BASE_URL, options: { defaultProjectId?: string | null } = {}) {
     validateBaseUrl(baseUrl);
     this.apiKey = apiKey;
     this.baseUrl = baseUrl.replace(/\/$/, "");
+    this.defaultProjectId = options.defaultProjectId?.trim() || null;
   }
 
   private headers(): Record<string, string> {
@@ -174,7 +176,8 @@ export class AssertClient {
     limit?: number;
   }): Promise<ListScenariosResult> {
     const qs = new URLSearchParams();
-    if (params.project_id) qs.set("project_id", params.project_id);
+    const projectId = params.project_id || this.defaultProjectId;
+    if (projectId) qs.set("project_id", projectId);
     if (params.cursor) qs.set("cursor", params.cursor);
     if (params.limit !== undefined) qs.set("limit", String(params.limit));
     const query = qs.toString() ? `?${qs}` : "";
@@ -188,7 +191,15 @@ export class AssertClient {
     project_id?: string;
     save?: boolean;
   }): Promise<GenerateScenarioResult> {
-    return this.request<GenerateScenarioResult>("POST", "/v1/scenarios/generate", params, 10_000);
+    return this.request<GenerateScenarioResult>(
+      "POST",
+      "/v1/scenarios/generate",
+      {
+        ...params,
+        project_id: params.project_id || this.defaultProjectId || undefined,
+      },
+      10_000
+    );
   }
 
   /** Submit an ad-hoc markdown run (create → upload → start). */
@@ -202,7 +213,7 @@ export class AssertClient {
       "/v1/runs",
       {
         markdown: params.markdown,
-        project_id: params.project_id,
+        project_id: params.project_id || this.defaultProjectId || undefined,
         request_id: params.request_id,
         source: "mcp",
       },

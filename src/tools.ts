@@ -43,6 +43,7 @@ export const AssertRunInput = z.object({
     .max(100_000)
     .optional()
     .describe("Optional. Run an ad-hoc scenario without saving it first."),
+  project_id: z.string().optional().describe("Optional. Associate an ad-hoc markdown run with a project."),
   request_id: z
     .string()
     .optional()
@@ -131,6 +132,10 @@ export const TOOL_DEFINITIONS = [
           description:
             "Optional. Run an ad-hoc scenario without saving it first.",
         },
+        project_id: {
+          type: "string",
+          description: "Optional. Associate an ad-hoc markdown run with a project.",
+        },
         request_id: {
           type: "string",
           description:
@@ -217,7 +222,7 @@ export async function handleAssertRun(
     return structuredError("VALIDATION_ERROR", message, field);
   }
 
-  const { scenario_id, markdown, request_id } = parsed.data;
+  const { scenario_id, markdown, project_id, request_id } = parsed.data;
 
   if (!scenario_id && !markdown) {
     return structuredError(
@@ -239,7 +244,7 @@ export async function handleAssertRun(
     if (scenario_id) {
       return await client.runScenario({ scenario_id, request_id });
     } else {
-      return await client.runMarkdown({ markdown: markdown!, request_id });
+      return await client.runMarkdown({ markdown: markdown!, project_id, request_id });
     }
   } catch (err) {
     if (err instanceof AssertApiError && err.status === 404) {

@@ -8,8 +8,12 @@
     "args": ["-y", "@assert-click/mcp"],
     "env": {
       "ASSERT_API_KEY": {
-        "description": "Your Assert API key. Get one free at dashboard.assert.click",
-        "required": true
+        "description": "Your Assert API key. Optional if your repo uses assert.config.json or assert.config.local.json.",
+        "required": false
+      },
+      "ASSERT_CONFIG": {
+        "description": "Optional path to an Assert config file or project directory.",
+        "required": false
       }
     }
   }

@@ -1,31 +1,23 @@
 # @assert-click/mcp
 
-Run real Playwright E2E tests from your AI coding agent — no Playwright knowledge required. Describe what to test in plain English, Assert writes and executes the test against your live app, and reports back step-by-step results.
+MCP server for Assert.
 
-Works with Claude (Desktop & Code), Cursor, Windsurf, and any MCP-compatible client.
+It exposes four tools over stdio:
 
----
+- `assert_list`
+- `assert_generate`
+- `assert_run`
+- `assert_status`
 
-## Quick start (3 steps)
+## Requirements
 
-### 1. Create a free account and get your API key
+- Node.js `>=18.17`
+- An Assert API key, usually provided via `ASSERT_API_KEY`
 
-Go to **[dashboard.assert.click/register](https://dashboard.assert.click/register)** and sign up — it's free.
+## Install
 
-Once you're in:
-1. Click **Settings** in the left sidebar
-2. Click **API Keys**
-3. Click **Create API key**, give it a name (e.g. "Cursor"), copy the key
+Use it directly with `npx`:
 
-> Keep this key safe — you won't be able to see it again.
-
----
-
-### 2. Add Assert to your MCP client config
-
-Pick your client below and paste the config. Replace `your_api_key_here` with the key you just copied.
-
-**Claude Desktop** — edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
@@ -40,155 +32,167 @@ Pick your client below and paste the config. Replace `your_api_key_here` with th
 }
 ```
 
-**Claude Code** — edit `~/.claude/claude_desktop_config.json` (same format as above).
+Optional environment variables:
 
-**Cursor** — go to Settings → MCP, add a new server, paste:
+- `ASSERT_API_KEY`: preferred API key env var
+- `ASSERT_PROJECT_ID`: optional default project ID
+- `ASSERT_CONFIG`: optional path to a config file or directory
+
+## Config files
+
+The MCP server will look for these files from the current directory upward:
+
+- `assert.config.json`
+- `assert.config.local.json`
+
+`assert.config.local.json` is merged on top of `assert.config.json`.
+
+For safety, API host overrides are only read from `ASSERT_API_URL` / `ASSERT_HOST_URL` or `assert.config.local.json`. A committed `assert.config.json` cannot change the Assert API host.
+
+Example:
+
 ```json
 {
-  "command": "npx",
-  "args": ["-y", "@assert-click/mcp"],
-  "env": {
-    "ASSERT_API_KEY": "your_api_key_here"
+  "projectApiKey": "assert_project_key_here",
+  "projectId": "project_123",
+  "mcp": {
+    "projectId": "project_123"
   }
 }
 ```
 
-**Windsurf** — go to Settings → Cascade → MCP Servers, paste the same config.
+If you prefer env-based secrets instead of committing the key:
 
----
-
-### 3. Restart your AI client
-
-Close and reopen it. That's it — Assert is now available as a tool.
-
----
-
-## Try it
-
-Once configured, ask your AI:
-
-> *"Write and run an E2E test that checks a user can log in to https://myapp.com and reach the dashboard."*
-
-The AI will:
-1. Generate a test scenario from your description
-2. Run it against your live app using Playwright
-3. Report back pass/fail with step-by-step details and failure explanations
-
-You don't need to install Playwright, write any code, or touch a config file.
-
----
-
-## What the AI can do
-
-| Say something like... | What happens |
-|---|---|
-| "Write and run a login test for my app" | Generates + runs a scenario in one go |
-| "Run my existing tests" | Lists saved scenarios and runs them |
-| "Save this test for later" | Saves the scenario so it can be reused |
-| "What tests do I have?" | Lists all saved scenarios |
-
----
-
-## Tools reference
-
-### `assert_list`
-List existing test scenarios saved in Assert.
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `project_id` | string | No | Filter by project ID |
-| `cursor` | string | No | Pagination cursor from previous response |
-| `limit` | number | No | Max results (default 20, max 100) |
-
-**Returns:** `{ scenarios: [...], next_cursor: string | null }`
-
----
-
-### `assert_generate`
-Generate a test scenario from a plain-English description. Optionally save it.
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `description` | string | Yes | Plain English description of what to test |
-| `url` | string | Yes | Base URL of the app under test |
-| `project_id` | string | No | Associate with a project |
-| `save` | boolean | No | Save to Assert for future runs (default: false) |
-
-**Returns:** `{ scenario_id: string | null, markdown: string, saved: boolean }`
-
----
-
-### `assert_run`
-Execute a test. Provide either a saved `scenario_id` or raw `markdown`. Runs are async — poll with `assert_status`.
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `scenario_id` | string | One of | ID of a saved scenario |
-| `markdown` | string | One of | Ad-hoc scenario (no save required) |
-| `request_id` | string | No | Idempotency key |
-
-**Returns:** `{ run_id: string, status: "running" }`
-
----
-
-### `assert_status`
-Poll a run for step-level results. The AI calls this every few seconds until complete.
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `run_id` | string | Yes | Run ID from `assert_run` |
-
-**Returns:**
 ```json
 {
-  "run_id": "abc123",
-  "status": "passed | failed | running | queued | errored",
-  "steps": [
-    { "description": "Fill email", "status": "passed", "error": null, "screenshot_url": null },
-    { "description": "Click Sign in", "status": "failed", "error": "Element not found", "screenshot_url": "https://..." }
-  ],
-  "failure_summary": "Element not found on step: Click Sign in"
+  "projectApiKeyEnv": "ASSERT_API_KEY",
+  "projectId": "project_123"
 }
 ```
 
----
+## Tools
 
-## Scenario Markdown format
+### `assert_list`
 
-Assert uses a plain-text format to describe tests. The AI writes this for you — but if you want to write or edit scenarios yourself:
+List saved scenarios.
 
-```markdown
-URL: https://myapp.com/login
-SCENARIO: User logs in with valid credentials
-PROCESS:
-  - Fill "email" with "test@example.com"
-  - Fill "password" with "hunter2"
-  - Click "Sign in"
-  - Wait for "Welcome back"
-EXPECT: Dashboard
+Input:
+
+- `project_id?: string`
+- `cursor?: string`
+- `limit?: number`
+
+Returns:
+
+```json
+{
+  "scenarios": [
+    {
+      "id": "scenario_123",
+      "name": "Login flow",
+      "project_id": "project_123",
+      "last_run_status": "passed",
+      "last_run_at": "2026-03-31T10:00:00.000Z",
+      "url": "https://example.com/login"
+    }
+  ],
+  "next_cursor": null
+}
 ```
 
-Supported steps: `Fill`, `Click`, `Select option`, `Check`, `Press`, `Wait for`, `Scroll`, `Upload`, `Go back`, `Reload`, and more. See [assert.click](https://assert.click) for the full reference.
+### `assert_generate`
 
----
+Generate scenario markdown on the Assert service.
 
-## Error handling
+Input:
 
-All tools return structured errors — never raw exceptions:
+- `description: string`
+- `url: string`
+- `project_id?: string`
+- `save?: boolean`
+
+Returns:
+
+```json
+{
+  "scenario_id": "scenario_123",
+  "markdown": "URL: https://example.com/login\nSCENARIO: Login\nPROCESS:\n  - Fill \"email\" with \"user@example.com\"\nEXPECT: Dashboard",
+  "saved": true
+}
+```
+
+### `assert_run`
+
+Start a run from either a saved scenario ID or ad-hoc markdown.
+
+Input:
+
+- `scenario_id?: string`
+- `markdown?: string`
+- `project_id?: string`
+- `request_id?: string`
+
+Exactly one of `scenario_id` or `markdown` must be provided.
+
+Returns:
+
+```json
+{
+  "run_id": "run_123",
+  "status": "queued",
+  "estimated_duration_seconds": null
+}
+```
+
+### `assert_status`
+
+Fetch run status and step-level results.
+
+Input:
+
+- `run_id: string`
+
+Returns:
+
+```json
+{
+  "run_id": "run_123",
+  "status": "passed",
+  "duration_ms": 4200,
+  "steps": [
+    {
+      "description": "Fill email",
+      "status": "passed",
+      "error": null,
+      "screenshot_url": null
+    }
+  ],
+  "failure_summary": null,
+  "full_log_url": null
+}
+```
+
+## Errors
+
+Errors are returned as structured JSON:
 
 ```json
 {
   "error": {
-    "code": "INVALID_API_KEY | SCENARIO_NOT_FOUND | RUN_NOT_FOUND | VALIDATION_ERROR | UPSTREAM_ERROR",
-    "message": "Human-readable explanation",
-    "field": "the_offending_field | null"
+    "code": "INVALID_API_KEY",
+    "message": "The ASSERT_API_KEY is invalid or missing.",
+    "field": null
   }
 }
 ```
 
-If you see `INVALID_API_KEY`, double-check your key in the config file and that it hasn't been revoked in the Assert dashboard.
+Common codes:
 
----
+- `INVALID_API_KEY`
+- `SCENARIO_NOT_FOUND`
+- `RUN_NOT_FOUND`
+- `VALIDATION_ERROR`
+- `UPSTREAM_ERROR`
 
 ## License
 
