@@ -29,6 +29,7 @@
     "tsup": "^8.0.1",
     "typescript": "^5.5.4"
   },
+  "homepage": "https://assert.click",
   "license": "MIT",
   "repository": {
     "type": "git",
