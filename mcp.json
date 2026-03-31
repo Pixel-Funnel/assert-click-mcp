@@ -1,18 +1,18 @@
 {
   "name": "Assert",
-  "description": "Run real Playwright E2E tests from your AI coding agent. Describe what to test in plain English, Assert writes and executes the test, and reports back step-by-step results.",
+  "description": "Run real Playwright E2E tests from your AI coding agent. Point the MCP server at your repo's assert.config.json, then generate scenarios, run tests, and inspect results from chat.",
   "icon": "https://assert.click/img/icon.png",
   "homepage": "https://assert.click",
   "server": {
     "command": "npx",
     "args": ["-y", "@assert-click/mcp"],
     "env": {
-      "ASSERT_API_KEY": {
-        "description": "Your Assert API key. Optional if your repo uses assert.config.json or assert.config.local.json.",
+      "ASSERT_CONFIG": {
+        "description": "Path to your repo's assert.config.json or a project directory containing it.",
         "required": false
       },
-      "ASSERT_CONFIG": {
-        "description": "Optional path to an Assert config file or project directory.",
+      "ASSERT_API_KEY": {
+        "description": "Optional override if you do not store a project key in assert.config.json.",
         "required": false
       }
     }

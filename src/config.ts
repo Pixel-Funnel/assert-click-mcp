@@ -151,8 +151,6 @@ export function resolveMcpConfig(options: {
 
   let configDir: string | null = null;
   let files: string[] = [];
-  let baseConfig: JsonObject = {};
-  let localConfig: JsonObject = {};
   if (configPath) {
     const explicit = resolveExplicitTarget(cwd, configPath);
     configDir = explicit.configDir;
@@ -167,26 +165,13 @@ export function resolveMcpConfig(options: {
   let config: JsonObject = {};
   for (const filePath of files) {
     const parsed = readConfigFile(filePath);
-    const baseName = path.basename(filePath);
-    if (baseName === LOCAL_CONFIG_FILE) {
-      localConfig = mergeConfig(localConfig, parsed);
-    } else {
-      baseConfig = mergeConfig(baseConfig, parsed);
-    }
     config = mergeConfig(config, parsed);
   }
 
   const mcp = sectionFor(config, "mcp");
-  const localMcp = sectionFor(localConfig, "mcp");
   return {
     apiKey: resolveApiKey(env, config, mcp),
-    baseUrl:
-      (env.ASSERT_API_URL ||
-        env.ASSERT_HOST_URL ||
-        readString(localMcp, ["apiUrl", "baseUrl", "hostUrl"]) ||
-        readString(localConfig, ["apiUrl", "baseUrl", "hostUrl"]) ||
-        options.defaultBaseUrl ||
-        "https://api.assert.click").replace(/\/$/, ""),
+    baseUrl: String(options.defaultBaseUrl || "https://api.assert.click").replace(/\/$/, ""),
     projectId:
       env.ASSERT_PROJECT_ID ||
       readString(mcp, ["projectId", "project_id"]) ||

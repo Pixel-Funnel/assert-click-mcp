@@ -12,11 +12,20 @@ It exposes four tools over stdio:
 ## Requirements
 
 - Node.js `>=18.17`
-- An Assert API key, usually provided via `ASSERT_API_KEY`
+- A project-scoped Assert key, either stored in `assert.config.json` or provided via `ASSERT_API_KEY`
 
 ## Install
 
-Use it directly with `npx`:
+Create `assert.config.json` in your repo:
+
+```json
+{
+  "projectApiKey": "assert_project_key_here",
+  "projectId": "project_123"
+}
+```
+
+Then point your MCP client at it:
 
 ```json
 {
@@ -25,7 +34,7 @@ Use it directly with `npx`:
       "command": "npx",
       "args": ["-y", "@assert-click/mcp"],
       "env": {
-        "ASSERT_API_KEY": "your_api_key_here"
+        "ASSERT_CONFIG": "/absolute/path/to/assert.config.json"
       }
     }
   }
@@ -47,17 +56,12 @@ The MCP server will look for these files from the current directory upward:
 
 `assert.config.local.json` is merged on top of `assert.config.json`.
 
-For safety, API host overrides are only read from `ASSERT_API_URL` / `ASSERT_HOST_URL` or `assert.config.local.json`. A committed `assert.config.json` cannot change the Assert API host.
-
 Example:
 
 ```json
 {
   "projectApiKey": "assert_project_key_here",
-  "projectId": "project_123",
-  "mcp": {
-    "projectId": "project_123"
-  }
+  "projectId": "project_123"
 }
 ```
 
