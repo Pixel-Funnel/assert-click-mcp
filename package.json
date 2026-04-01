@@ -1,6 +1,6 @@
 {
   "name": "@assert-click/mcp",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Run AI-powered E2E tests from plain Markdown. Generate scenarios, execute Playwright tests, and inspect results — all from your AI coding agent.",
   "type": "module",
   "bin": {
