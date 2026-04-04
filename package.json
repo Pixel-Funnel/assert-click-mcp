@@ -40,10 +40,17 @@
   },
   "keywords": [
     "mcp",
+    "model-context-protocol",
     "assert",
     "playwright",
     "e2e",
     "testing",
-    "ai"
+    "ai",
+    "ai-testing",
+    "automation",
+    "end-to-end",
+    "cursor",
+    "claude",
+    "windsurf"
   ]
 }

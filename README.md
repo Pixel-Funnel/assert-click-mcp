@@ -1,22 +1,26 @@
 # @assert-click/mcp
 
-MCP server for Assert.
+MCP server for [Assert](https://assert.click) — lets your AI coding agent generate, run, and inspect E2E tests without leaving the chat.
 
-It exposes four tools over stdio:
+Describe a user flow in plain English. Assert generates a Playwright test, executes it in a real browser, and returns step-level results and failure screenshots — all from a single tool call in Cursor, Claude, Windsurf, or any MCP-compatible agent.
 
-- `assert_list`
-- `assert_generate`
-- `assert_run`
-- `assert_status`
+**[Sign up free at assert.click](https://assert.click)** to get your API key and project ID before using this package.
+
+## What your agent can do
+
+- **Generate** — describe a flow, get back a Markdown scenario ready to save and run
+- **Run** — execute a saved scenario or ad-hoc Markdown against a real Chromium browser
+- **Inspect** — fetch step-level pass/fail, error messages, and failure screenshot URLs
+- **List** — browse saved scenarios for the project
 
 ## Requirements
 
 - Node.js `>=18.17`
-- A project-scoped Assert key, either stored in `assert.config.json` or provided via `ASSERT_API_KEY`
+- A project-scoped Assert key — get one at [assert.click](https://assert.click)
 
-## Install
+## Setup
 
-Create `assert.config.json` in your repo:
+**1. Create `assert.config.json` in your repo:**
 
 ```json
 {
@@ -25,7 +29,7 @@ Create `assert.config.json` in your repo:
 }
 ```
 
-Then point your MCP client at it:
+**2. Add the MCP server to your agent config:**
 
 ```json
 {
@@ -41,9 +45,11 @@ Then point your MCP client at it:
 }
 ```
 
-Optional environment variables:
+That's it. Your agent now has access to all four Assert tools.
 
-- `ASSERT_API_KEY`: preferred API key env var
+## Environment variables
+
+- `ASSERT_API_KEY`: API key (alternative to storing it in `assert.config.json`)
 - `ASSERT_PROJECT_ID`: optional default project ID
 - `ASSERT_CONFIG`: optional path to a config file or directory
 
@@ -56,15 +62,6 @@ The MCP server will look for these files from the current directory upward:
 
 `assert.config.local.json` is merged on top of `assert.config.json`.
 
-Example:
-
-```json
-{
-  "projectApiKey": "assert_project_key_here",
-  "projectId": "project_123"
-}
-```
-
 If you prefer env-based secrets instead of committing the key:
 
 ```json
@@ -76,44 +73,16 @@ If you prefer env-based secrets instead of committing the key:
 
 ## Tools
 
-### `assert_list`
-
-List saved scenarios.
-
-Input:
-
-- `project_id?: string`
-- `cursor?: string`
-- `limit?: number`
-
-Returns:
-
-```json
-{
-  "scenarios": [
-    {
-      "id": "scenario_123",
-      "name": "Login flow",
-      "project_id": "project_123",
-      "last_run_status": "passed",
-      "last_run_at": "2026-03-31T10:00:00.000Z",
-      "url": "https://example.com/login"
-    }
-  ],
-  "next_cursor": null
-}
-```
-
 ### `assert_generate`
 
-Generate scenario markdown on the Assert service.
+Generate a Markdown scenario from a plain-English description.
 
 Input:
 
-- `description: string`
-- `url: string`
+- `description: string` — what the user should be able to do
+- `url: string` — the starting URL
 - `project_id?: string`
-- `save?: boolean`
+- `save?: boolean` — save to the project (default: true)
 
 Returns:
 
@@ -127,7 +96,7 @@ Returns:
 
 ### `assert_run`
 
-Start a run from either a saved scenario ID or ad-hoc markdown.
+Execute a saved scenario or ad-hoc Markdown in a real browser.
 
 Input:
 
@@ -150,7 +119,7 @@ Returns:
 
 ### `assert_status`
 
-Fetch run status and step-level results.
+Fetch step-level results for a run.
 
 Input:
 
@@ -173,6 +142,34 @@ Returns:
   ],
   "failure_summary": null,
   "full_log_url": null
+}
+```
+
+### `assert_list`
+
+List saved scenarios for a project.
+
+Input:
+
+- `project_id?: string`
+- `cursor?: string`
+- `limit?: number`
+
+Returns:
+
+```json
+{
+  "scenarios": [
+    {
+      "id": "scenario_123",
+      "name": "Login flow",
+      "project_id": "project_123",
+      "last_run_status": "passed",
+      "last_run_at": "2026-03-31T10:00:00.000Z",
+      "url": "https://example.com/login"
+    }
+  ],
+  "next_cursor": null
 }
 ```
 
