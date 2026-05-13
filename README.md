@@ -11,7 +11,7 @@ Describe a user flow in plain English. Assert generates a Playwright test, execu
 - **Generate** — describe a flow, get back a Markdown scenario ready to save and run
 - **Run** — execute a saved scenario or ad-hoc Markdown against a real Chromium browser
 - **Inspect** — fetch step-level pass/fail, error messages, and failure screenshot URLs
-- **List** — browse saved scenarios for the project
+- **List** — browse saved scenarios visible to the API key
 
 ## Requirements
 
@@ -46,6 +46,18 @@ Describe a user flow in plain English. Assert generates a Playwright test, execu
 ```
 
 That's it. Your agent now has access to all four Assert tools.
+
+## Private URLs
+
+Targets such as `localhost`, `127.0.0.1`, and LAN or VPN IP addresses are blocked by default.
+
+Use a public URL unless the machine executing the Assert run is intentionally configured to allow private targets with:
+
+```bash
+ALLOW_PRIVATE_TARGETS=true
+```
+
+Set that on the machine or process running Assert. Do not put it in `assert.config.json`.
 
 ## Environment variables
 
@@ -82,7 +94,7 @@ Input:
 - `description: string` — what the user should be able to do
 - `url: string` — the starting URL
 - `project_id?: string`
-- `save?: boolean` — save to the project (default: true)
+- `save?: boolean` — save to the project (default: false)
 
 Returns:
 
@@ -147,13 +159,15 @@ Returns:
 
 ### `assert_list`
 
-List saved scenarios for a project.
+List saved scenarios visible to the API key.
 
 Input:
 
 - `project_id?: string`
 - `cursor?: string`
 - `limit?: number`
+
+`project_id` is currently reserved for future filtering support. The current API lists all scenarios visible to the API key.
 
 Returns:
 
@@ -163,7 +177,7 @@ Returns:
     {
       "id": "scenario_123",
       "name": "Login flow",
-      "project_id": "project_123",
+      "project_id": null,
       "last_run_status": "passed",
       "last_run_at": "2026-03-31T10:00:00.000Z",
       "url": "https://example.com/login"

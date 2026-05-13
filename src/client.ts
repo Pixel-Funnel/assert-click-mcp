@@ -3,6 +3,8 @@
  * Injects API key, handles timeouts, and returns structured errors.
  */
 
+import { USER_AGENT } from "./version.js";
+
 export class AssertApiError extends Error {
   code: string;
   field: string | null;
@@ -20,7 +22,7 @@ export class AssertApiError extends Error {
 export interface ScenarioSummary {
   id: string;
   name: string;
-  project_id: string;
+  project_id: string | null;
   last_run_status: "passed" | "failed" | "pending" | "never_run";
   last_run_at: string | null;
   url: string;
@@ -102,7 +104,7 @@ export class AssertClient {
     return {
       Authorization: `Bearer ${this.apiKey}`,
       "Content-Type": "application/json",
-      "User-Agent": "assert-mcp/1.0",
+      "User-Agent": USER_AGENT,
     };
   }
 
@@ -176,8 +178,7 @@ export class AssertClient {
     limit?: number;
   }): Promise<ListScenariosResult> {
     const qs = new URLSearchParams();
-    const projectId = params.project_id || this.defaultProjectId;
-    if (projectId) qs.set("project_id", projectId);
+    if (params.project_id) qs.set("project_id", params.project_id);
     if (params.cursor) qs.set("cursor", params.cursor);
     if (params.limit !== undefined) qs.set("limit", String(params.limit));
     const query = qs.toString() ? `?${qs}` : "";

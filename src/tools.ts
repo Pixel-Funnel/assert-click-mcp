@@ -11,7 +11,10 @@ import { AssertClient, AssertApiError, structuredError, wrapError } from "./clie
 // ---------------------------------------------------------------------------
 
 export const AssertListInput = z.object({
-  project_id: z.string().optional().describe("Optional. Filter by project ID."),
+  project_id: z
+    .string()
+    .optional()
+    .describe("Optional. Reserved for future project filtering support; the current API lists all scenarios visible to the API key."),
   cursor: z.string().optional().describe("Optional. Pagination cursor from previous response."),
   limit: z
     .number()
@@ -68,13 +71,13 @@ export const TOOL_DEFINITIONS = [
   {
     name: "assert_list",
     description:
-      "List existing E2E test scenarios saved in Assert. Use this to audit coverage before generating new tests. Supports filtering by project and pagination.",
+      "List existing E2E test scenarios saved in Assert. Use this to audit coverage before generating new tests. Supports pagination. Project filtering is reserved but not currently enforced by the API.",
     inputSchema: {
       type: "object",
       properties: {
         project_id: {
           type: "string",
-          description: "Optional. Filter by project ID.",
+          description: "Optional. Reserved for future project filtering support; the current API lists all scenarios visible to the API key.",
         },
         cursor: {
           type: "string",

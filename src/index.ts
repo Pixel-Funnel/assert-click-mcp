@@ -20,6 +20,7 @@ import {
   handleAssertRun,
   handleAssertStatus,
 } from "./tools.js";
+import { PACKAGE_VERSION } from "./version.js";
 
 // ---------------------------------------------------------------------------
 // Bootstrap
@@ -57,7 +58,7 @@ const client = new AssertClient(apiKey, runtimeConfig.baseUrl, {
 const server = new Server(
   {
     name: "assert",
-    version: "1.0.0",
+    version: PACKAGE_VERSION,
     description:
       "Run AI-powered E2E tests from plain Markdown. Generate scenarios, execute Playwright tests, and inspect results — all from your AI coding agent.",
   },
